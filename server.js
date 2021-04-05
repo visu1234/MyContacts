@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const connectDB = require("./config/db");
 const PORT = process.env.PORT || 5000;
 
 // First we need to create routes(end points) register login get contacts update contacts
@@ -10,6 +11,15 @@ const PORT = process.env.PORT || 5000;
 app.get("/", (req, res) => {
   res.send("Hello world");
 });
+
+// connect to Database
+connectDB();
+/*
+What is Middleware? It is those methods/functions/operations that are 
+called BETWEEN processing the Request and sending the Response in your application method.
+*/
+// Init middleware
+app.use(express.json({ extended: false }));
 
 app.use("/api/users", require("./routes/users"));
 app.use("/api/auth", require("./routes/auth"));
