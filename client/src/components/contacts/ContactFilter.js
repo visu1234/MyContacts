@@ -1,6 +1,8 @@
 import React, { useContext, useRef, useEffect } from "react";
 import ContactContext from "../../context/contact/contactContext";
 
+// useRef - value will persist even after re-render and also changing the value will not render the page
+
 const ContactFilter = () => {
   const contactContext = useContext(ContactContext);
   const { filterContacts, clearFilter, filtered } = contactContext;
