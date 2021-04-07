@@ -10,7 +10,7 @@ import {
   CLEAR_FILTER,
   CONTACT_ERROR,
 } from "../types";
-
+// Added test comments
 export default (state, action) => {
   switch (action.type) {
     case GET_CONTACTS:
