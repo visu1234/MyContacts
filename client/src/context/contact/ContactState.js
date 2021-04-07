@@ -1,5 +1,6 @@
 import React, { useContext, useReducer } from "react";
 //import uuid from "uuid";
+import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import contactContext from "./contactContext";
 import contactReducer from "./contactReducer";
@@ -18,41 +19,65 @@ import {
 
 const ContactState = (props) => {
   const initialState = {
-    contacts: [
-      {
-        type: "personal",
-        id: 1,
-        name: "vivek",
-        email: "vivektest@gmail.com",
-        phone: "70145682194",
-      },
-      {
-        type: "professional",
-        id: 2,
-        name: "Avi",
-        email: "avitest@gmail.com",
-        phone: "7016821956",
-      },
-      {
-        type: "professional",
-        id: 3,
-        name: "shakil",
-        email: "shakiltest@gmail.com",
-        phone: "7018732194",
-      },
-    ],
+    contacts: [],
     current: null,
     filtered: null, // array of contacts matching with current filter
+    error: null,
   };
   const [state, dispatch] = useReducer(contactReducer, initialState);
+  // Get contacts
+  const getContacts = async () => {
+    // Here we no need to send token inspite of private route as while login user, token is stored globally
+    try {
+      const res = await axios.get("/api/contacts");
+      dispatch({ type: GET_CONTACTS, payload: res.data });
+    } catch (err) {
+      dispatch({ type: CONTACT_ERROR, payload: err.response.msg });
+    }
+  };
+
   // Add contact
-  const addContact = (contact) => {
-    contact.id = uuidv4();
-    dispatch({ type: ADD_CONTACT, payload: contact });
+  const addContact = async (contact) => {
+    const config = {
+      headers: {
+        "content-Type": "application/json",
+      },
+    };
+    // Here we no need to send token inspite of private route as while login user, token is stored globally
+    try {
+      const res = await axios.post("/api/contacts", contact, config);
+      dispatch({ type: ADD_CONTACT, payload: res.data });
+    } catch (err) {
+      dispatch({ type: CONTACT_ERROR, payload: err.response.msg });
+    }
+  };
+  // update contact
+  const updateContact = async (contact) => {
+    const config = {
+      headers: {
+        "content-Type": "application/json",
+      },
+    };
+    // Here we no need to send token inspite of private route as while login user, token is stored globally
+    try {
+      const res = await axios.put(
+        `/api/contacts/${contact._id}`,
+        contact,
+        config
+      );
+      dispatch({ type: UPDATE_CONTACT, payload: res.data });
+    } catch (err) {
+      dispatch({ type: CONTACT_ERROR, payload: err.response.msg });
+    }
   };
   // Delete Contact
-  const deleteContact = (id) => {
-    dispatch({ type: DELETE_CONTACT, payload: id });
+  const deleteContact = async (id) => {
+    try {
+      const res = await axios.delete(`/api/contacts/${id}`);
+      dispatch({ type: DELETE_CONTACT, payload: id });
+    } catch (err) {
+      dispatch({ type: CONTACT_ERROR, payload: err.response.msg });
+    }
   };
   //Set Current contact
   const setCurrent = (contact) => {
@@ -62,10 +87,6 @@ const ContactState = (props) => {
   const clearCurrent = () => {
     dispatch({ type: CLEAR_CURRENT });
   };
-  // update contact
-  const updateContact = (contact) => {
-    dispatch({ type: UPDATE_CONTACT, payload: contact });
-  };
   // Filter contact
   const filterContacts = (text) => {
     dispatch({ type: FILTER_CONTACTS, payload: text });
@@ -74,6 +95,10 @@ const ContactState = (props) => {
   const clearFilter = () => {
     dispatch({ type: CLEAR_FILTER });
   };
+  // clear contacts
+  const clearContacts = () => {
+    dispatch({ type: CLEAR_CONTACTS });
+  };
   // Here in value attribute we need to add what all we want to have global access
   return (
     <contactContext.Provider
@@ -81,6 +106,8 @@ const ContactState = (props) => {
         contacts: state.contacts,
         current: state.current,
         filtered: state.filtered,
+        error: state.error,
+        getContacts,
         addContact,
         deleteContact,
         setCurrent,
@@ -88,6 +115,7 @@ const ContactState = (props) => {
         updateContact,
         filterContacts,
         clearFilter,
+        clearContacts,
       }}
     >
       {props.children}
